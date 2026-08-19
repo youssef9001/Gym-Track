@@ -1,0 +1,532 @@
+<section class="page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="page-label">
+        GYM TRACK
+      </span>
+
+      <h1>
+        Trainers
+      </h1>
+
+      <p>
+        Manage your gym trainers and their information.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="add-button"
+    >
+      + Add Trainer
+    </button>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="message">
+      Loading trainers...
+    </div>
+
+  }
+
+
+  @if (message()) {
+
+    <div class="message">
+      {{ message() }}
+    </div>
+
+  }
+
+
+  <div class="stats">
+
+    <div class="stat-card">
+
+      <div class="stat-icon orange">
+        👥
+      </div>
+
+      <div>
+        <span>Total Trainers</span>
+
+        <strong>
+          {{ trainers().length }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        ✓
+      </div>
+
+      <div>
+        <span>Active Trainers</span>
+
+        <strong>
+          {{
+            trainers().filter(
+              trainer => trainer.active
+            ).length
+          }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon purple">
+        ★
+      </div>
+
+      <div>
+        <span>Average Rating</span>
+
+        <strong>
+          {{
+            trainers().length
+              ? (
+                  trainers()
+                    .reduce(
+                      (total, trainer) =>
+                        total + trainer.rating,
+                      0
+                    ) /
+                  trainers().length
+                ).toFixed(1)
+              : "0.0"
+          }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon blue">
+        👤
+      </div>
+
+      <div>
+        <span>Total Clients</span>
+
+        <strong>
+          {{
+            trainers().reduce(
+              (total, trainer) =>
+                total + trainer.clientsCount,
+              0
+            )
+          }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <section class="trainers-section">
+
+    <div class="section-header">
+
+      <div>
+
+        <h2>
+          Trainers
+        </h2>
+
+        <p>
+          Registered trainers in the gym
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (trainers().length > 0) {
+
+      <div class="trainer-grid">
+
+        @for (
+          trainer of trainers();
+          track trainer._id
+        ) {
+
+          <article class="trainer-card">
+
+            <div class="trainer-top">
+
+              <div class="avatar">
+                {{ trainer.name.charAt(0) }}
+              </div>
+
+              <span
+                class="status"
+                [class.active]="trainer.active"
+                [class.inactive]="!trainer.active"
+              >
+                {{
+                  trainer.active
+                    ? "Active"
+                    : "Inactive"
+                }}
+              </span>
+
+            </div>
+
+
+            <div class="trainer-info">
+
+              <h3>
+                {{ trainer.name }}
+              </h3>
+
+              <p>
+                {{ trainer.email }}
+              </p>
+
+            </div>
+
+
+            <div class="specialization">
+              {{ trainer.specialization }}
+            </div>
+
+
+            <div class="trainer-details">
+
+              <div>
+                <span>Experience</span>
+
+                <strong>
+                  {{ trainer.experienceYears }} years
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Clients</span>
+
+                <strong>
+                  {{ trainer.clientsCount }}
+                </strong>
+              </div>
+
+
+              <div>
+                <span>Rating</span>
+
+                <strong>
+                  ⭐ {{ trainer.rating }}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="trainer-contact">
+
+              <span>
+                📞 {{ trainer.phone }}
+              </span>
+
+            </div>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="edit-button"
+                (click)="startEdit(trainer)"
+              >
+                Edit
+              </button>
+
+
+              <button
+                type="button"
+                class="delete-button"
+                (click)="deleteTrainer(trainer._id)"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    } @else {
+
+      <div class="empty-state">
+
+        <h3>
+          No trainers found
+        </h3>
+
+        <p>
+          Add a trainer to start managing your gym team.
+        </p>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <section class="form-section">
+
+    <div class="form-header">
+
+      <div>
+
+        <span class="page-label">
+
+          {{
+            editingTrainerId()
+              ? "EDIT TRAINER"
+              : "NEW TRAINER"
+          }}
+
+        </span>
+
+        <h2>
+
+          {{
+            editingTrainerId()
+              ? "Edit Trainer"
+              : "Add Trainer"
+          }}
+
+        </h2>
+
+      </div>
+
+
+      @if (editingTrainerId()) {
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="cancelEdit()"
+        >
+          Cancel
+        </button>
+
+      }
+
+    </div>
+
+
+    <form
+      (ngSubmit)="saveTrainer()"
+    >
+
+      <div class="form-grid">
+
+        <div class="input-group">
+
+          <label>
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="form.name"
+            placeholder="Enter trainer name"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Email
+          </label>
+
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="form.email"
+            placeholder="trainer@email.com"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Age
+          </label>
+
+          <input
+            type="number"
+            name="age"
+            [(ngModel)]="form.age"
+            min="18"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Phone
+          </label>
+
+          <input
+            type="text"
+            name="phone"
+            [(ngModel)]="form.phone"
+            placeholder="01XXXXXXXXX"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Specialization
+          </label>
+
+          <select
+            name="specialization"
+            [(ngModel)]="form.specialization"
+            required
+          >
+
+            <option value="Fitness">
+              Fitness
+            </option>
+
+            <option value="Weight Loss">
+              Weight Loss
+            </option>
+
+            <option value="Muscle Gain">
+              Muscle Gain
+            </option>
+
+            <option value="Bodybuilding">
+              Bodybuilding
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Experience Years
+          </label>
+
+          <input
+            type="number"
+            name="experienceYears"
+            [(ngModel)]="form.experienceYears"
+            min="0"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Clients Count
+          </label>
+
+          <input
+            type="number"
+            name="clientsCount"
+            [(ngModel)]="form.clientsCount"
+            min="0"
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Rating
+          </label>
+
+          <input
+            type="number"
+            name="rating"
+            [(ngModel)]="form.rating"
+            min="0"
+            max="5"
+            step="0.1"
+          />
+
+        </div>
+
+      </div>
+
+
+      <label class="active-toggle">
+
+        <input
+          type="checkbox"
+          name="active"
+          [(ngModel)]="form.active"
+        />
+
+        <span>
+          Trainer is currently active
+        </span>
+
+      </label>
+
+
+      <button
+        type="submit"
+        class="save-button"
+      >
+
+        {{
+          editingTrainerId()
+            ? "Update Trainer"
+            : "Save Trainer"
+        }}
+
+      </button>
+
+    </form>
+
+  </section>
+
+</section>

@@ -1,0 +1,560 @@
+<section class="page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="page-label">GYM TRACK</span>
+
+      <h1>Members</h1>
+
+      <p>
+        Manage your gym members and their subscriptions.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="add-button"
+    >
+      + Add Member
+    </button>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="message">
+      Loading members...
+    </div>
+
+  }
+
+
+  @if (message()) {
+
+    <div class="message">
+      {{ message() }}
+    </div>
+
+  }
+
+
+  <div class="stats">
+
+    <div class="stat-card">
+
+      <div class="stat-icon orange">
+        👥
+      </div>
+
+      <div>
+        <span>Total Members</span>
+        <strong>{{ members().length }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon green">
+        ✓
+      </div>
+
+      <div>
+        <span>Active Members</span>
+
+        <strong>
+          {{
+            members().filter(
+              member => member.active
+            ).length
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon red">
+        !
+      </div>
+
+      <div>
+        <span>Inactive Members</span>
+
+        <strong>
+          {{
+            members().filter(
+              member => !member.active
+            ).length
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon purple">
+        ★
+      </div>
+
+      <div>
+        <span>Weight Loss</span>
+
+        <strong>
+          {{
+            members().filter(
+              member =>
+                member.goal === 'Weight Loss'
+            ).length
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <section class="members-section">
+
+    <div class="section-header">
+
+      <div>
+        <h2>Members</h2>
+
+        <p>
+          Registered members in the gym
+        </p>
+      </div>
+
+    </div>
+
+
+    @if (members().length > 0) {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Member</th>
+
+              <th>Email</th>
+
+              <th>Goal</th>
+
+              <th>Membership</th>
+
+              <th>Start Date</th>
+
+              <th>End Date</th>
+
+              <th>Status</th>
+
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              member of members();
+              track member._id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <div class="member-info">
+
+                    <div class="avatar">
+                      {{ member.name.charAt(0) }}
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {{ member.name }}
+                      </strong>
+
+                      <small>
+                        {{ member.age }} years
+                      </small>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+                  {{ member.email }}
+                </td>
+
+
+                <td>
+
+                  <span class="goal">
+                    {{ member.goal }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <span class="membership">
+                    {{ member.membershipType }}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{ member.subscriptionStart }}
+                </td>
+
+
+                <td>
+                  {{ member.subscriptionEnd }}
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="status"
+                    [class.active]="member.active"
+                    [class.inactive]="!member.active"
+                  >
+
+                    {{
+                      member.active
+                        ? 'Active'
+                        : 'Inactive'
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="startEdit(member)"
+                    >
+                      Edit
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="delete-button"
+                      (click)="deleteMember(member._id)"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    } @else {
+
+      <div class="empty-state">
+
+        <h3>
+          No members found
+        </h3>
+
+        <p>
+          Add a member to start managing your gym.
+        </p>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <section class="form-section">
+
+    <div class="form-header">
+
+      <div>
+
+        <span class="page-label">
+          {{ editingMemberId() ? 'EDIT MEMBER' : 'NEW MEMBER' }}
+        </span>
+
+        <h2>
+          {{
+            editingMemberId()
+              ? 'Edit Member'
+              : 'Add Member'
+          }}
+        </h2>
+
+      </div>
+
+      @if (editingMemberId()) {
+
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="cancelEdit()"
+        >
+          Cancel
+        </button>
+
+      }
+
+    </div>
+
+
+    <form
+      (ngSubmit)="saveMember()"
+    >
+
+      <div class="form-grid">
+
+        <div class="input-group">
+
+          <label>
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="form.name"
+            placeholder="Enter member name"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Email
+          </label>
+
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="form.email"
+            placeholder="member@email.com"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Age
+          </label>
+
+          <input
+            type="number"
+            name="age"
+            [(ngModel)]="form.age"
+            min="1"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Weight
+          </label>
+
+          <input
+            type="number"
+            name="weight"
+            [(ngModel)]="form.weight"
+            min="1"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Height
+          </label>
+
+          <input
+            type="number"
+            name="height"
+            [(ngModel)]="form.height"
+            min="1"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Goal
+          </label>
+
+          <select
+            name="goal"
+            [(ngModel)]="form.goal"
+          >
+
+            <option value="Weight Loss">
+              Weight Loss
+            </option>
+
+            <option value="Muscle Gain">
+              Muscle Gain
+            </option>
+
+            <option value="Fitness">
+              Fitness
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Membership Type
+          </label>
+
+          <select
+            name="membershipType"
+            [(ngModel)]="form.membershipType"
+          >
+
+            <option value="Monthly">
+              Monthly
+            </option>
+
+            <option value="Quarterly">
+              Quarterly
+            </option>
+
+            <option value="Yearly">
+              Yearly
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Subscription Start
+          </label>
+
+          <input
+            type="date"
+            name="subscriptionStart"
+            [(ngModel)]="form.subscriptionStart"
+            required
+          />
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>
+            Subscription End
+          </label>
+
+          <input
+            type="date"
+            name="subscriptionEnd"
+            [(ngModel)]="form.subscriptionEnd"
+            required
+          />
+
+        </div>
+
+      </div>
+
+
+      <label class="active-toggle">
+
+        <input
+          type="checkbox"
+          name="active"
+          [(ngModel)]="form.active"
+        />
+
+        <span>
+          Member is currently active
+        </span>
+
+      </label>
+
+
+      <button
+        type="submit"
+        class="save-button"
+      >
+        {{
+          editingMemberId()
+            ? 'Update Member'
+            : 'Save Member'
+        }}
+      </button>
+
+    </form>
+
+  </section>
+
+</section>

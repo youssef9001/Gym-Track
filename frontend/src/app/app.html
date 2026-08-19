@@ -1,0 +1,37 @@
+<div class="app-layout">
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <span>GYM</span> TRACK
+    </div>
+
+    <nav>
+
+      <a
+        routerLink="/members"
+        routerLinkActive="active"
+      >
+        <span>👥</span>
+        Members
+      </a>
+
+      <a
+        routerLink="/trainers"
+        routerLinkActive="active"
+      >
+        <span>🏋</span>
+        Trainers
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <main class="main-content">
+
+    <router-outlet />
+
+  </main>
+
+</div>
